@@ -1,0 +1,346 @@
+@using Microsoft.AspNetCore.Identity
+@using DPDDigitalMarketing.Services
+@inject SignInManager<DPDDigitalMarketing.Models.ApplicationUser> SignInManager
+@inject UserManager<DPDDigitalMarketing.Models.ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DPD Publications & Employment News</title>
+    
+    <!-- Instant Dark Mode Script (Prevents flash of white) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('dpd_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Modern Theme Stylesheet -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Top Modern Navigation Bar (Inspired by Screenshot) -->
+    <header class="py-2 py-lg-3 border-bottom sticky-top shadow-sm">
+        <div class="container-fluid px-3 px-xl-5">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 gap-lg-3">
+                
+                <!-- Left Nav Links -->
+                <nav class="d-none d-lg-flex align-items-center gap-2 gap-xl-3">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link fw-semibold px-2 py-1">Home</a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-category="EmploymentNews" class="nav-link fw-semibold px-2 py-1 position-relative">
+                        Employment News
+                        <span class="badge rounded-pill bg-warning text-dark position-absolute top-0 start-100 translate-middle-y" style="font-size: 0.6rem; margin-left: -5px;">HOT</span>
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-category="Journal" class="nav-link fw-semibold px-2 py-1">Journals</a>
+                    <a asp-controller="Library" asp-action="Index" class="nav-link fw-semibold px-2 py-1"><i class="bi bi-collection-play text-warning me-1"></i> Library</a>
+                    <a asp-controller="Marketing" asp-action="Dashboard" class="nav-link fw-semibold px-2 py-1">
+                        <i class="bi bi-graph-up-arrow text-warning me-1"></i> Analytics
+                    </a>
+                    <a asp-controller="Order" asp-action="SalesHistory" class="nav-link fw-semibold px-2 py-1">Orders</a>
+                </nav>
+
+                <!-- Center Logo / Brand -->
+                <div class="text-center">
+                    <a asp-controller="Home" asp-action="Index" class="brand-script text-decoration-none">
+                        DPD<span style="color: var(--color-accent-orange);">.</span>
+                    </a>
+                </div>
+
+                <!-- Right Actions: Search, Dark Mode, Cart, Login/Register -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Search Pill -->
+                    <form asp-controller="Product" asp-action="Index" method="get" class="nav-search-pill d-none d-md-inline-flex">
+                        <i class="bi bi-search text-muted"></i>
+                        <input type="text" name="search" placeholder="Search publications..." />
+                    </form>
+
+                    <!-- Dark Mode Toggle Button -->
+                    <button type="button" id="themeToggle" class="nav-theme-pill border-0" title="Toggle Dark/Light Mode">
+                        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                    </button>
+
+                    <!-- Cart Pill (Links to /Cart with live badge notification) -->
+                    @{
+                        var initialCartCount = CartSessionHelper.GetTotalCount(Context.Session);
+                    }
+                    <a asp-controller="Cart" asp-action="Index" class="nav-cart-pill position-relative" title="Shopping Bag" id="navCartBtn">
+                        <i class="bi bi-bag"></i>
+                        <span class="badge-count" id="cartBadgeCount">@initialCartCount</span>
+                    </a>
+
+                    <!-- Auth State (Login / Register / Profile) -->
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        <div class="dropdown">
+                            <button class="btn btn-pill-outline btn-sm dropdown-toggle d-flex align-items-center gap-2 nav-auth-btn" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle text-primary"></i>
+                                <span class="fw-semibold">@(currentUser?.FullName ?? User.Identity?.Name)</span>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <span class="badge bg-warning text-dark fw-bold rounded-pill" style="font-size: 0.65rem;">ADMIN</span>
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2" style="background: var(--color-surface); border: 1px solid var(--color-border) !important; min-width: 220px;">
+                                <li><h6 class="dropdown-header text-uppercase text-muted fw-bold small">Reader Account</h6></li>
+                                <li><a class="dropdown-item rounded-3 py-2" asp-controller="Library" asp-action="Index"><i class="bi bi-collection-play me-2"></i> My Library</a></li>
+                                <li><a class="dropdown-item rounded-3 py-2" asp-controller="Order" asp-action="SalesHistory"><i class="bi bi-receipt me-2"></i> My Orders</a></li>
+                                
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header text-uppercase text-warning fw-bold small"><i class="bi bi-shield-check me-1"></i> Admin Portal</h6></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Marketing" asp-action="Dashboard"><i class="bi bi-speedometer2 text-warning me-2"></i> Marketing Dashboard</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Marketing" asp-action="Campaigns"><i class="bi bi-megaphone text-warning me-2"></i> Campaign ROI</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Product" asp-action="Create"><i class="bi bi-plus-circle text-warning me-2"></i> Add Publication</a></li>
+                                }
+
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger rounded-3 py-2"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center gap-2 ms-1">
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-pill-outline btn-sm nav-auth-btn">Log in</a>
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-ink btn-sm nav-auth-btn">Sign up</a>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Live Floating Toast Notification (React-style Live Notification) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2050;">
+        <div id="liveCartToast" class="toast align-items-center shadow-lg border-0 rounded-4" role="alert" aria-live="assertive" aria-atomic="true" style="background: var(--color-surface); border: 1px solid var(--color-border) !important; min-width: 320px;">
+            <div class="d-flex p-3 align-items-center gap-3">
+                <div class="bg-warning text-dark rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                    <i class="bi bi-bag-check-fill fs-5"></i>
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-bold small text-truncate" id="toastItemTitle">Publication Added!</div>
+                    <div class="text-muted small" id="toastItemSub">Updated in your reading bag.</div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-ink btn-sm py-1 px-3 text-nowrap">View Bag</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Alert Banners -->
+    <div class="container mt-3">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 d-flex align-items-center gap-2 alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 d-flex align-items-center gap-2 alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    </div>
+
+    <!-- Main Content Area -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- Sleek Minimal Footer -->
+    <footer class="border-top py-5 mt-5">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-5">
+                    <div class="brand-script mb-2">
+                        DPD<span style="color: var(--color-accent-orange);">.</span>
+                    </div>
+                    <p class="text-muted small col-lg-10 mb-0">
+                        Official digital marketing and e-commerce portal for Publications Division, Ministry of Information & Broadcasting, Government of India.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex flex-wrap gap-3 small fw-semibold">
+                        <a asp-controller="Product" asp-action="Index" class="text-decoration-none text-muted">All Publications</a>
+                        <a asp-controller="Marketing" asp-action="Dashboard" class="text-decoration-none text-muted">Analytics Dashboard</a>
+                        <a asp-controller="Marketing" asp-action="Campaigns" class="text-decoration-none text-muted">Campaign ROI</a>
+                        <a asp-controller="Order" asp-action="SalesHistory" class="text-decoration-none text-muted">Multi-Channel Sales</a>
+                    </div>
+                </div>
+                <div class="col-md-3 text-md-end">
+                    <span class="badge-pill-orange">ASP.NET CORE 10 • MVC</span>
+                    <div class="text-muted small mt-2">© 2026 DPD Digital Marketing Platform</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Dark Mode & Dynamic Cart Notification Logic -->
+    <script>
+        const themeBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dpd_theme', theme);
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-sun-fill text-warning';
+            } else {
+                themeIcon.className = 'bi bi-moon-stars-fill';
+            }
+        }
+
+        // Initialize icon state
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(currentTheme);
+
+        if (themeBtn) {
+            themeBtn.addEventListener('click', function() {
+                const active = document.documentElement.getAttribute('data-theme');
+                applyTheme(active === 'dark' ? 'light' : 'dark');
+            });
+        }
+
+        // Dynamic Cart Badge Updater with Pop Animation (React-style state sync)
+        window.updateCartBadge = function(newCount) {
+            const badge = document.getElementById('cartBadgeCount');
+            if (!badge) return;
+
+            const applyCount = function(count) {
+                badge.textContent = count;
+                // Pop animation effect
+                badge.classList.remove('badge-pop');
+                void badge.offsetWidth; // trigger reflow
+                badge.classList.add('badge-pop');
+            };
+
+            if (typeof newCount === 'number') {
+                applyCount(newCount);
+            } else {
+                fetch('/Cart/GetCount')
+                    .then(res => res.json())
+                    .then(data => applyCount(data.count))
+                    .catch(err => console.error('Cart sync error:', err));
+            }
+        };
+
+        // Live Cart Toast Notification Display
+        window.showCartToast = function(title, count) {
+            const toastEl = document.getElementById('liveCartToast');
+            if (!toastEl) return;
+
+            const titleEl = document.getElementById('toastItemTitle');
+            const subEl = document.getElementById('toastItemSub');
+
+            if (titleEl && title) titleEl.textContent = title;
+            if (subEl && count !== undefined) {
+                subEl.textContent = `${count} ${count === 1 ? 'publication' : 'publications'} in your reading bag.`;
+            }
+
+            try {
+                if (window.bootstrap && bootstrap.Toast) {
+                    const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3500 });
+                    toast.show();
+                } else {
+                    toastEl.classList.add('show');
+                    setTimeout(() => toastEl.classList.remove('show'), 3500);
+                }
+            } catch (e) {
+                console.log('Toast notification triggered:', e);
+            }
+        };
+
+        // AJAX Add to Bag helper
+        window.addToCartAjax = function(productId, btnElement) {
+            const originalHtml = btnElement ? btnElement.innerHTML : '';
+            if (btnElement) {
+                btnElement.disabled = true;
+                btnElement.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Adding...';
+            }
+
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('quantity', 1);
+
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.updateCartBadge(data.cartCount);
+                    window.showCartToast(data.title || 'Publication Added!', data.cartCount);
+                    if (btnElement) {
+                        btnElement.innerHTML = '<i class="bi bi-check2"></i> Added!';
+                        setTimeout(() => {
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalHtml;
+                        }, 1400);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (btnElement) {
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalHtml;
+                }
+            });
+        };
+
+        // Auto-dismiss alert notifications after 10 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                if (window.bootstrap && bootstrap.Alert) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                } else {
+                    alert.classList.remove('show');
+                    setTimeout(() => alert.remove(), 400);
+                }
+            });
+        }, 10000);
+
+        // Auto-sync on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            window.updateCartBadge();
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

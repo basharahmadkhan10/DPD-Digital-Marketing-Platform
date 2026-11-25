@@ -1,0 +1,111 @@
+@model IEnumerable<DPDDigitalMarketing.Models.Product>
+@{
+    ViewData["Title"] = "Publications Catalog";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="badge-pill-orange mb-1 d-inline-block">OFFICIAL CATALOG</span>
+            <h2 class="fw-bold font-display mb-0">Journals & Employment News</h2>
+            <p class="text-muted small">Explore weekly recruitment notices, civil service journals, and magazines.</p>
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-ink">
+                <i class="bi bi-plus-lg"></i>
+                <span>Add New Publication (Admin)</span>
+            </a>
+        }
+    </div>
+
+    <!-- Filter Pills & Search Bar -->
+    <div class="modern-card p-3 mb-4">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Search by title, exam, or keyword..." value="@ViewBag.SearchTerm" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select form-control-pill">
+                    <option value="">All Categories</option>
+                    <option value="EmploymentNews" selected="@(ViewBag.SelectedCategory == "EmploymentNews")">Employment News / Rozgar</option>
+                    <option value="Journal" selected="@(ViewBag.SelectedCategory == "Journal")">Journals (Yojana / Kurukshetra)</option>
+                    <option value="Book" selected="@(ViewBag.SelectedCategory == "Book")">Books</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="language" class="form-select form-control-pill">
+                    <option value="">All Languages</option>
+                    <option value="English" selected="@(ViewBag.SelectedLanguage == "English")">English</option>
+                    <option value="Hindi" selected="@(ViewBag.SelectedLanguage == "Hindi")">Hindi</option>
+                    <option value="Urdu" selected="@(ViewBag.SelectedLanguage == "Urdu")">Urdu</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-ink py-2">Apply Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Publications Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center py-5">
+                <div class="text-muted fs-4 mb-2"><i class="bi bi-search"></i></div>
+                <h5 class="fw-bold">No publications found</h5>
+                <p class="text-muted small">Try modifying your search or filter options.</p>
+                <a asp-action="Index" class="btn btn-pill-outline btn-sm">Clear Filters</a>
+            </div>
+        }
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="modern-card h-100 p-3 d-flex flex-column">
+                    <div class="position-relative mb-3 overflow-hidden rounded-4">
+                        <img src="@item.CoverImageUrl" class="w-100" style="height: 220px; object-fit: cover; transition: transform 0.4s ease;" alt="@item.Title" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                        <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-1 fw-bold small">
+                            @item.Category
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-light text-secondary border rounded-pill">@item.Language</span>
+                        <span class="text-success small fw-semibold"><i class="bi bi-box-seam me-1"></i> Stock: @item.StockQuantity</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">@item.Title</h5>
+                    <p class="text-muted small flex-grow-1 mb-3">
+                        @(item.Description.Length > 90 ? item.Description.Substring(0, 90) + "..." : item.Description)
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                        <div>
+                            <span class="fs-4 fw-bold">₹@item.Price</span>
+                            <span class="text-muted small">/ copy</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm py-2 px-2" title="Edit Description & Details (Admin)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            }
+                            <button type="button" class="btn btn-pill-outline btn-sm py-2 px-3" onclick="addToCartAjax(@item.Id, this)" title="Add to Bag">
+                                <i class="bi bi-bag-plus"></i>
+                            </button>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-ink btn-sm py-2 px-3">
+                                <span>Details</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

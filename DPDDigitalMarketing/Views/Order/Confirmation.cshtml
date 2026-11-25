@@ -1,0 +1,71 @@
+@model DPDDigitalMarketing.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmed";
+    var firstItem = Model.OrderItems.FirstOrDefault();
+    var firstProductId = firstItem?.ProductId ?? 1;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="modern-card p-4 p-md-5">
+                <div class="mb-3 text-success">
+                    <i class="bi bi-patch-check-fill" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="fw-bold font-display mb-2">Order Confirmed!</h2>
+                <p class="text-muted">Thank you, <strong>@Model.CustomerName</strong>. Your official publication order has been registered.</p>
+                <div class="badge-pill-orange fs-6 py-2 px-3 mx-auto mb-4 d-inline-block">
+                    Order Receipt ID: #DPD-@Model.Id
+                </div>
+
+                <!-- Digital Reader Unlock Banner (Udemy Style Immediate Access) -->
+                <div class="p-4 rounded-4 border mb-4 text-start" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(251, 191, 36, 0.12) 100%);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-dark rounded-circle p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-collection-play-fill fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold mb-1">Your Digital Reader Is Ready!</h5>
+                            <p class="text-muted small mb-0">You now have lifetime digital access to full vacancy tables, exam syllabus breakdowns, and downloadable gazette PDFs.</p>
+                        </div>
+                        <a asp-controller="Library" asp-action="Read" asp-route-id="@firstProductId" class="btn btn-ink py-2 px-3 text-nowrap">
+                            <i class="bi bi-book-half me-1"></i> Start Reading Now
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Order Receipt Details -->
+                <div class="text-start bg-light p-3 rounded-4 border mb-4">
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Order Date & Time:</span>
+                        <span class="fw-semibold">@Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Purchase Channel:</span>
+                        <span class="badge bg-dark rounded-pill px-3 py-1">@Model.SaleChannel</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Receipt Email:</span>
+                        <span class="fw-semibold">@Model.CustomerEmail</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                        <span class="fw-bold">Total Paid:</span>
+                        <span class="fw-bold text-success fs-5">₹@Model.TotalAmount</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <a asp-controller="Library" asp-action="Index" class="btn btn-ink py-2 px-4">
+                        <i class="bi bi-collection-play me-1"></i> Open My Library
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-pill-outline py-2 px-3">
+                        Continue Browsing
+                    </a>
+                    <a asp-controller="Marketing" asp-action="Dashboard" class="btn btn-pill-outline py-2 px-3">
+                        View Analytics Impact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

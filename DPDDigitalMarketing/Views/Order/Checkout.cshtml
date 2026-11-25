@@ -1,0 +1,100 @@
+@model DPDDigitalMarketing.Models.Order
+@{
+    var cartItems = ViewBag.CartItems as List<DPDDigitalMarketing.Models.CartItem> ?? new();
+    var totalAmount = (decimal)(ViewBag.TotalAmount ?? 0);
+    ViewData["Title"] = "Direct Checkout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="modern-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <span class="badge-pill-orange mb-1 d-inline-block">OFFICIAL PURCHASE</span>
+                        <h3 class="fw-bold font-display mb-0">Confirm Your Order</h3>
+                        <small class="text-muted">Purchasing @cartItems.Sum(i => i.Quantity) copies via Official DPD Portal</small>
+                    </div>
+                    <span class="badge bg-secondary rounded-pill px-3 py-2 small">Channel: @ViewBag.Channel</span>
+                </div>
+
+                <!-- Verified Logged-in Account Banner -->
+                <div class="alert alert-success border-0 rounded-4 p-3 d-flex align-items-center gap-3 mb-4">
+                    <i class="bi bi-shield-check fs-4 text-success flex-shrink-0"></i>
+                    <div class="small">
+                        <strong>Verified Account:</strong> Purchasing as <span class="fw-bold">@User.Identity?.Name</span>. Your purchased digital issues will be unlocked in your account's Digital Library.
+                    </div>
+                </div>
+
+                <!-- Products in Cart Summary -->
+                <div class="rounded-4 bg-light p-3 mb-4 border">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-journal-check me-2 text-primary"></i> Order Items (@cartItems.Count distinct issues):</h6>
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var item in cartItems)
+                        {
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-white border">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@item.CoverImageUrl" alt="@item.Title" style="width: 45px; height: 60px; object-fit: cover;" class="rounded-2 shadow-sm" />
+                                    <div>
+                                        <div class="fw-bold small">@item.Title</div>
+                                        <small class="text-muted">Qty: @item.Quantity × ₹@item.Price</small>
+                                    </div>
+                                </div>
+                                <div class="fw-bold text-dark">₹@item.Total</div>
+                            </div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                        <span class="fw-bold text-muted">Total Payable:</span>
+                        <span class="fs-4 fw-bold text-primary font-display">₹@totalAmount</span>
+                    </div>
+                </div>
+
+                <form asp-action="Checkout" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="SaleChannel" value="@ViewBag.Channel" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CustomerName" class="form-label small fw-semibold">Full Name</label>
+                            <input asp-for="CustomerName" class="form-control form-control-pill" placeholder="e.g. Aman Sharma" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CustomerEmail" class="form-label small fw-semibold">Email (for Digital Receipt & Notifications)</label>
+                            <input asp-for="CustomerEmail" type="email" class="form-control form-control-pill" placeholder="aman@example.com" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CustomerPhone" class="form-label small fw-semibold">Contact Mobile</label>
+                            <input asp-for="CustomerPhone" class="form-control form-control-pill" placeholder="+91 9876543210" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Payment Option</label>
+                            <select class="form-select form-control-pill">
+                                <option>UPI (Google Pay, PhonePe, Paytm)</option>
+                                <option>Credit / Debit Card</option>
+                                <option>Net Banking</option>
+                                <option>Cash on Delivery</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ShippingAddress" class="form-label small fw-semibold">Delivery Address (for Print Copies)</label>
+                        <textarea asp-for="ShippingAddress" class="form-control rounded-4" rows="2" placeholder="House no, locality, city, state, pin code..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-pill-outline btn-sm">← Back to Bag</a>
+                        <button type="submit" class="btn btn-ink py-3 px-4">
+                            <span>Pay ₹@totalAmount & Place Order</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

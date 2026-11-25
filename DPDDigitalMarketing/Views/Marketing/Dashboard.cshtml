@@ -1,0 +1,356 @@
+@model DPDDigitalMarketing.Services.DashboardSummary
+@{
+    ViewData["Title"] = "Marketing & Analytics Dashboard";
+    var campaigns = ViewBag.Campaigns as List<DPDDigitalMarketing.Models.Campaign> ?? new();
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="badge-pill-orange mb-1 d-inline-block">DATA INTELLIGENCE</span>
+            <h2 class="fw-bold font-display mb-0">Marketing & Sales Performance</h2>
+            <p class="text-muted small">Channel attribution, multi-platform revenue, and campaign cost-effectiveness.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-ink" data-bs-toggle="modal" data-bs-target="#emailBlastModal">
+                <i class="bi bi-envelope-paper-fill me-1"></i>
+                <span>Send Job Alert Blast</span>
+            </button>
+            <a asp-action="CreateCampaign" class="btn btn-pill-outline">
+                <i class="bi bi-plus-lg me-1"></i> New Campaign
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metric Cards (Modern Clean Look) -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="modern-card p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Direct Confirmed Sales</span>
+                    <span class="badge-pill-orange"><i class="bi bi-shield-check"></i> Banked</span>
+                </div>
+                <div class="display-6 fw-bold font-display text-dark">₹@Model.TotalRevenue.ToString("N0")</div>
+                <div class="text-muted small mt-2"><i class="bi bi-credit-card-2-front text-success me-1"></i> Official website gateway receipts</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="modern-card p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Referred Marketplace GMV</span>
+                    <span class="badge-pill-dark"><i class="bi bi-shop"></i> Marketplaces</span>
+                </div>
+                <div class="display-6 fw-bold font-display text-dark">₹@Model.ReferredMarketplaceGMV.ToString("N0")</div>
+                <div class="text-muted small mt-2"><i class="bi bi-arrow-up-right-square text-primary me-1"></i> Amazon, Flipkart & external referrals</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="modern-card p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Orders & Leads</span>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 small fw-bold">Traffic</span>
+                </div>
+                <div class="display-6 fw-bold font-display text-dark">@(Model.TotalOrders + Model.TotalLeads)</div>
+                <div class="text-muted small mt-2">@Model.TotalOrders Direct Orders • @Model.TotalLeads Marketplace Leads</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="modern-card p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Alert Subscribers</span>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 small fw-bold"><i class="bi bi-bell-fill"></i> Reach</span>
+                </div>
+                <div class="display-6 fw-bold font-display text-dark">@Model.TotalSubscribers</div>
+                <div class="text-muted small mt-2">Job aspirants & journal reader list</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Channel Sales Breakdown Chart (Chart.js) -->
+        <div class="col-lg-6">
+            <div class="modern-card p-4 h-100 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="fw-bold mb-1"><i class="bi bi-pie-chart text-warning me-2"></i> Multi-Channel Attribution</h5>
+                        <p class="text-muted small mb-0" id="chartSubtitle">Website Direct vs. Amazon vs. Flipkart Referrals</p>
+                    </div>
+                    <!-- Chart Metric Toggle Buttons -->
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-ink btn-sm active" id="btnAttributed">GMV Value (₹)</button>
+                        <button type="button" class="btn btn-pill-outline btn-sm" id="btnVolume">Orders & Leads</button>
+                        <button type="button" class="btn btn-pill-outline btn-sm" id="btnDirectCash">Direct Cash (₹)</button>
+                    </div>
+                </div>
+                <div style="position: relative; height: 270px;" class="d-flex justify-content-center align-items-center my-auto">
+                    <canvas id="channelChart"></canvas>
+                </div>
+                <!-- Channel Breakdown Pills -->
+                <div class="border-top pt-3 mt-3">
+                    <div class="row g-2 text-center small">
+                        @foreach (var ch in Model.SalesByChannel)
+                        {
+                            <div class="col-4">
+                                <div class="p-2 rounded-3 bg-light border">
+                                    <div class="fw-bold">@ch.Channel</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">@ch.OrderCount @(ch.Channel == "Website" ? "Orders" : "Leads")</div>
+                                    <div class="fw-bold text-primary" style="font-size: 0.8rem;">₹@ch.AttributedRevenue.ToString("N0")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campaign Spend vs Revenue Chart -->
+        <div class="col-lg-6">
+            <div class="modern-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1"><i class="bi bi-graph-up text-success me-2"></i> Campaign ROI & Spend</h5>
+                        <p class="text-muted small mb-0">Cost effectiveness across marketing tools</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 310px;">
+                    <canvas id="campaignChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaigns ROI Table -->
+    <div class="modern-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">Active Digital Marketing Campaigns</h5>
+                <p class="text-muted small mb-0">Optimizing SEO, Email Newsletters, and Social Channels</p>
+            </div>
+            <a asp-action="Campaigns" class="btn btn-pill-outline btn-sm">Full Report</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="rounded-start">Campaign Name</th>
+                        <th>Channel</th>
+                        <th>Cost (₹)</th>
+                        <th>Revenue (₹)</th>
+                        <th>Conversions</th>
+                        <th>ROI (%)</th>
+                        <th class="rounded-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in campaigns)
+                    {
+                        <tr>
+                            <td class="fw-bold">@c.CampaignName</td>
+                            <td><span class="badge bg-light text-dark border rounded-pill px-2 py-1">@c.Channel</span></td>
+                            <td>₹@c.Cost.ToString("N0")</td>
+                            <td class="text-success fw-bold">₹@c.RevenueGenerated.ToString("N0")</td>
+                            <td>@c.Conversions orders</td>
+                            <td>
+                                <span class="badge @(c.ROI > 0 ? "bg-success" : "bg-danger") rounded-pill px-2 py-1">
+                                    @(c.ROI > 0 ? "+" : "")@c.ROI.ToString("F1")%
+                                </span>
+                            </td>
+                            <td><span class="badge bg-light text-secondary border rounded-pill px-2 py-1">@c.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Send Email Alert Blast -->
+<div class="modal fade" id="emailBlastModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-5 border-0 p-3 shadow-lg">
+            <form asp-action="SendEmailBlast" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <span class="badge-pill-orange mb-1 d-inline-block">EMAIL MARKETING</span>
+                        <h4 class="modal-title fw-bold font-display">Dispatch Alert Blast</h4>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Target Audience</label>
+                        <select name="targetGroup" class="form-select form-control-pill">
+                            <option value="All">All Active Subscribers (@Model.TotalSubscribers)</option>
+                            <option value="EmploymentNews">Employment News Job Seekers</option>
+                            <option value="Journals">Journal & Magazine Readers</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Subject Line</label>
+                        <input type="text" name="subject" class="form-control form-control-pill" placeholder="Official Release: Latest Employment News with 25,000+ Govt Vacancies" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Message Body</label>
+                        <textarea name="messageContent" class="form-control rounded-4" rows="3" placeholder="Major highlights: UPSC CSE notification, SSC recruitment, and Yojana issue..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-pill-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-ink py-2 px-4">
+                        <span>Dispatch Blast</span>
+                        <i class="bi bi-send-fill ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let channelChartInstance = null;
+        let cachedChannelData = null;
+
+        function renderChannelChart(metric) {
+            if (!cachedChannelData) return;
+
+            let dataValues = [];
+            let chartLabel = '';
+
+            const btnAttributed = document.getElementById('btnAttributed');
+            const btnVolume = document.getElementById('btnVolume');
+            const btnDirectCash = document.getElementById('btnDirectCash');
+            const subtitle = document.getElementById('chartSubtitle');
+
+            btnAttributed.className = 'btn btn-pill-outline btn-sm';
+            btnVolume.className = 'btn btn-pill-outline btn-sm';
+            btnDirectCash.className = 'btn btn-pill-outline btn-sm';
+
+            if (metric === 'volume') {
+                dataValues = cachedChannelData.orderCounts;
+                chartLabel = 'Orders & Referral Leads';
+                btnVolume.className = 'btn btn-ink btn-sm active';
+                if (subtitle) subtitle.textContent = 'Transaction Count (Direct Orders vs Outbound Marketplace Clicks)';
+            } else if (metric === 'cash') {
+                dataValues = cachedChannelData.revenues;
+                chartLabel = 'Direct Confirmed Cash (₹)';
+                btnDirectCash.className = 'btn btn-ink btn-sm active';
+                if (subtitle) subtitle.textContent = 'Actual payments received in DPD Bank Account';
+            } else {
+                // Default: Attributed GMV
+                dataValues = cachedChannelData.attributedRevenues;
+                chartLabel = 'Attributed Marketplace Value (₹)';
+                btnAttributed.className = 'btn btn-ink btn-sm active';
+                if (subtitle) subtitle.textContent = 'Gross Merchandise Value (Direct Sales + Marketplace Referred Value)';
+            }
+
+            if (channelChartInstance) {
+                channelChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('channelChart').getContext('2d');
+            channelChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: cachedChannelData.labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#111315', '#f97316', '#06b6d4', '#10b981', '#8b5cf6'],
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                    if (metric === 'volume') {
+                                        return ` ${context.label}: ${val} transactions (${pct}%)`;
+                                    } else {
+                                        return ` ${context.label}: ₹${val.toLocaleString()} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        // Fetch API data from Unit VI Web API controller
+        fetch('/api/analytics/channels')
+            .then(res => res.json())
+            .then(data => {
+                cachedChannelData = data;
+                // Render Attributed GMV by default so Amazon and Flipkart are prominently visible!
+                renderChannelChart('attributed');
+
+                document.getElementById('btnAttributed')?.addEventListener('click', () => renderChannelChart('attributed'));
+                document.getElementById('btnVolume')?.addEventListener('click', () => renderChannelChart('volume'));
+                document.getElementById('btnDirectCash')?.addEventListener('click', () => renderChannelChart('cash'));
+            });
+
+        // Campaign Spend vs Revenue Chart
+        fetch('/api/analytics/campaign-roi')
+            .then(res => res.json())
+            .then(campaigns => {
+                const labels = campaigns.map(c => c.campaignName.length > 18 ? c.campaignName.substring(0, 18) + '...' : c.campaignName);
+                const costs = campaigns.map(c => c.cost);
+                const revenues = campaigns.map(c => c.revenueGenerated);
+
+                new Chart(document.getElementById('campaignChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Cost / Spend (₹)',
+                                data: costs,
+                                backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                                borderRadius: 8
+                            },
+                            {
+                                label: 'Revenue Generated (₹)',
+                                data: revenues,
+                                backgroundColor: 'rgba(17, 19, 21, 0.9)',
+                                borderRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 12 } }
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.04)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+}

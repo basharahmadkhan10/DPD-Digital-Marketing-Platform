@@ -1,0 +1,33 @@
+## .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Sensitive / Local only
+**/appsettings.Development.json
+*.db-shm
+*.db-wal
+
+## SQLite DB - keep the schema but not the binary
+*.db
+
+## Logs
+*.log
+
+## Build output
+publish/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Python scripts (scratch files)
+*.py
+
+## PDF Reports (large files)
+DPD_Report.pdf
+DPDDigitalMarketing/DPD_Digital_Marketing_Project_Report.pdf

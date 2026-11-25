@@ -1,0 +1,145 @@
+@model DPDDigitalMarketing.Models.Product
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-4">
+    <div class="row g-4 justify-content-center">
+        <!-- Cover Image Column -->
+        <div class="col-lg-5">
+            <div class="modern-card p-3 text-center">
+                <img src="@Model.CoverImageUrl" class="rounded-4 img-fluid w-100" style="max-height: 480px; object-fit: cover;" alt="@Model.Title" />
+            </div>
+        </div>
+
+        <!-- Product Details Column -->
+        <div class="col-lg-7">
+            <div class="modern-card p-4 p-md-5">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge-pill-orange">@Model.Category</span>
+                    <span class="badge-pill-dark">@Model.Language Edition</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold small">
+                        <i class="bi bi-check-circle-fill me-1"></i> In Stock (@Model.StockQuantity copies)
+                    </span>
+                </div>
+
+                <h2 class="fw-bold font-display mb-2">@Model.Title</h2>
+                <div class="text-muted small mb-3">
+                    Published by Publications Division • Release Date: @Model.IssueDate.ToString("dd MMMM yyyy")
+                </div>
+
+                <div class="d-flex align-items-baseline gap-2 mb-4">
+                    <span class="display-6 fw-bold text-dark">₹@Model.Price</span>
+                    <span class="text-muted small">Inclusive of all taxes & postal charges</span>
+                </div>
+
+                <p class="text-muted fs-6 mb-4" style="line-height: 1.7;">
+                    @Model.Description
+                </p>
+
+                <!-- Multi-Channel Purchase Box (Core Requirement) -->
+                <div class="p-4 rounded-4 bg-light border mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-cart-check-fill text-warning fs-5"></i>
+                        <span class="fw-bold">Choose Your Purchase Channel:</span>
+                    </div>
+
+                    <!-- Direct Official DPD Store Options: Cart or Instant Checkout -->
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <button type="button" class="btn btn-pill-outline w-100 py-3 d-flex align-items-center justify-content-center gap-2 fw-bold" onclick="addToCartAjax(@Model.Id, this)">
+                                    <i class="bi bi-bag-plus-fill fs-5"></i>
+                                    <span>Add to Bag</span>
+                                </button>
+                            </div>
+                            <div class="col-sm-6">
+                                <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.Id" asp-route-channel="Website" class="btn btn-ink w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                    <span>Instant Buy Now</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- External Marketplace Options (Amazon & Flipkart) -->
+                    <div class="pt-2 border-top">
+                        <div class="text-muted small fw-semibold mb-2">Also Available On Marketplaces:</div>
+                        <div class="row g-2">
+                            @if (!string.IsNullOrEmpty(Model.AmazonUrl))
+                            {
+                                <div class="col-sm-6">
+                                    <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Amazon" class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark" target="_blank">
+                                        <i class="bi bi-shop me-1"></i> Buy on Amazon
+                                    </a>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.FlipkartUrl))
+                            {
+                                <div class="col-sm-6">
+                                    <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Flipkart" class="btn btn-info w-100 py-2 rounded-pill fw-bold text-white" target="_blank">
+                                        <i class="bi bi-box-seam me-1"></i> Buy on Flipkart
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media Sharing & Digital Marketing (Free Sharing - No Purchase Required) -->
+                <div class="border-top pt-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <span class="text-muted small fw-bold"><i class="bi bi-share text-warning me-1"></i> Share Publication (Free - No Purchase Needed):</span>
+                        <span class="badge bg-light text-muted small border">Organic Referral Tracked</span>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        @{
+                            var shareUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/Product/Details/{Model.Id}?utm_source=social_share&utm_medium=referral";
+                            var waUrl = $"https://api.whatsapp.com/send?text={Uri.EscapeDataString($"📢 {Model.Title}\nCheck official recruitment & journal updates on DPD Portal:\n{shareUrl}")}";
+                            var twUrl = $"https://twitter.com/intent/tweet?text={Uri.EscapeDataString($"📢 {Model.Title} - Publications Division, Govt of India")}&url={Uri.EscapeDataString(shareUrl)}&hashtags=SarkariNaukri,EmploymentNews,UPSC";
+                            var inUrl = $"https://www.linkedin.com/sharing/share-offsite/?url={Uri.EscapeDataString(shareUrl)}";
+                        }
+                        <a href="@waUrl" target="_blank" class="btn btn-pill-outline btn-sm text-success fw-semibold" title="Share with WhatsApp Study Groups">
+                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                        </a>
+                        <a href="@twUrl" target="_blank" class="btn btn-pill-outline btn-sm fw-semibold" title="Post on Twitter / X">
+                            <i class="bi bi-twitter-x me-1"></i> Twitter
+                        </a>
+                        <a href="@inUrl" target="_blank" class="btn btn-pill-outline btn-sm text-primary fw-semibold" title="Share on LinkedIn">
+                            <i class="bi bi-linkedin me-1"></i> LinkedIn
+                        </a>
+                        <button type="button" class="btn btn-pill-outline btn-sm text-secondary fw-semibold" onclick="copyShareLink('@shareUrl', this)">
+                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a asp-action="Index" class="btn btn-pill-outline btn-sm">← Back to Catalog</a>
+                    
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm fw-bold">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Publication & Description (Admin)
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyShareLink(url, btn) {
+        navigator.clipboard.writeText(url).then(function() {
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2 text-success me-1"></i> Link Copied!';
+            setTimeout(() => { btn.innerHTML = oldHtml; }, 2500);
+            if (window.showCartToast) {
+                window.showCartToast("Link Copied!", "Share with your exam study group or social media channel.");
+            }
+        }).catch(function() {
+            prompt("Copy this shareable publication link:", url);
+        });
+    }
+</script>

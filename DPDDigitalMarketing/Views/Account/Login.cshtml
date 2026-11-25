@@ -1,0 +1,69 @@
+@model DPDDigitalMarketing.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Log in to DPD";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="modern-card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="brand-script mb-2">
+                        DPD<span style="color: var(--color-accent-orange);">.</span>
+                    </div>
+                    <h3 class="fw-bold font-display">Welcome Back</h3>
+                    <p class="text-muted small">Sign in to access your publications, order history & marketing dashboard.</p>
+                </div>
+
+                <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    @if (!string.IsNullOrEmpty(Model.ReturnUrl) && Model.ReturnUrl.Contains("Checkout"))
+                    {
+                        <div class="alert alert-warning border-0 rounded-4 small p-3 mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-lock-fill fs-5 text-warning flex-shrink-0"></i>
+                            <div><strong>Login Required:</strong> Please sign in to complete your publication order.</div>
+                        </div>
+                    }
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 small p-3 mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label small fw-semibold">Email Address</label>
+                        <input asp-for="Email" class="form-control form-control-pill" placeholder="name@example.com" autofocus />
+                        <span asp-validation-for="Email" class="text-danger small ms-2"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label asp-for="Password" class="form-label small fw-semibold">Password</label>
+                            <span class="text-muted small">Min 4 chars</span>
+                        </div>
+                        <input asp-for="Password" type="password" class="form-control form-control-pill" placeholder="••••••••" />
+                        <span asp-validation-for="Password" class="text-danger small ms-2"></span>
+                    </div>
+
+                    <div class="mb-4 form-check d-flex align-items-center gap-2">
+                        <input asp-for="RememberMe" class="form-check-input mt-0" />
+                        <label asp-for="RememberMe" class="form-check-label small text-muted">Keep me signed in</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-ink w-100 justify-content-center py-3 mb-3">
+                        <span>Sign In</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Don't have an account yet?</span>
+                        <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-dark text-decoration-none small ms-1">Create an account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

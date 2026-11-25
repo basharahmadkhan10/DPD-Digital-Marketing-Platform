@@ -1,0 +1,58 @@
+@model DPDDigitalMarketing.Models.Campaign
+@{
+    ViewData["Title"] = "Create Marketing Campaign";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">Create Marketing Campaign</h4>
+                <small class="text-muted">Launch and track a new digital promotion channel.</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateCampaign" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="CampaignName" class="form-label fw-semibold">Campaign Name</label>
+                        <input asp-for="CampaignName" class="form-control" placeholder="e.g. UPSC CSE 2027 Notification Blast" required />
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Channel" class="form-label fw-semibold">Marketing Channel</label>
+                            <select asp-for="Channel" class="form-select">
+                                <option value="EmailMarketing">Email Newsletter Blast</option>
+                                <option value="SEO">SEO Optimization Campaign</option>
+                                <option value="SocialMedia_Facebook">Facebook / Instagram Ads</option>
+                                <option value="WhatsAppAlerts">WhatsApp Alerts</option>
+                                <option value="Amazon">Amazon Sponsored Listing</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Cost" class="form-label fw-semibold">Allocated Budget / Cost (₹)</label>
+                            <input asp-for="Cost" type="number" step="100" class="form-control" value="2000" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="RevenueGenerated" class="form-label fw-semibold">Estimated Revenue (₹)</label>
+                            <input asp-for="RevenueGenerated" type="number" step="100" class="form-control" value="8000" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Impressions" class="form-label fw-semibold">Expected Reach / Impressions</label>
+                            <input asp-for="Impressions" type="number" class="form-control" value="15000" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-top pt-3">
+                        <a asp-action="Campaigns" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Launch Campaign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

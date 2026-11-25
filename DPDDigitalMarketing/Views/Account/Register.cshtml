@@ -1,0 +1,81 @@
+@model DPDDigitalMarketing.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create an Account";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="modern-card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="brand-script mb-2">
+                        DPD<span style="color: var(--color-accent-orange);">.</span>
+                    </div>
+                    <h3 class="fw-bold font-display">Create Account</h3>
+                    <p class="text-muted small">Join DPD Portal to subscribe to job alerts, journals, and track orders.</p>
+                </div>
+
+                <form asp-action="Register" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @if (ViewData["ReturnUrl"] != null && ViewData["ReturnUrl"]!.ToString()!.Contains("Checkout"))
+                    {
+                        <div class="alert alert-warning border-0 rounded-4 small p-3 mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-lock-fill fs-5 text-warning flex-shrink-0"></i>
+                            <div><strong>Registration Required:</strong> Create your official DPD account to complete your publication order.</div>
+                        </div>
+                    }
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 small p-3 mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label small fw-semibold">Full Name</label>
+                        <input asp-for="FullName" class="form-control form-control-pill" placeholder="Rohan Gupta" required />
+                        <span asp-validation-for="FullName" class="text-danger small ms-2"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label small fw-semibold">Email Address</label>
+                        <input asp-for="Email" type="email" class="form-control form-control-pill" placeholder="rohan@example.com" required />
+                        <span asp-validation-for="Email" class="text-danger small ms-2"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label small fw-semibold">Password</label>
+                            <input asp-for="Password" type="password" class="form-control form-control-pill" placeholder="••••••••" required />
+                            <span asp-validation-for="Password" class="text-danger small ms-2"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label small fw-semibold">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control form-control-pill" placeholder="••••••••" required />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small ms-2"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Role" class="form-label small fw-semibold">Account Type</label>
+                        <select asp-for="Role" class="form-select form-control-pill">
+                            <option value="Customer">Reader / Job Aspirant (Standard User)</option>
+                            <option value="Admin">Marketing Manager / Admin</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-ink w-100 justify-content-center py-3 mb-3">
+                        <span>Get Started</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Already have an account?</span>
+                        <a asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="fw-bold text-dark text-decoration-none small ms-1">Sign In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

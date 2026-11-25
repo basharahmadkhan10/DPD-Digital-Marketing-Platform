@@ -1,0 +1,300 @@
+@model DPDDigitalMarketing.Services.DigitalIssue
+@{
+    var isUnlocked = (bool)(ViewBag.IsUnlocked ?? false);
+    var productPrice = (decimal)(ViewBag.ProductPrice ?? 20.00m);
+    var activeSection = ViewBag.ActiveSection as DPDDigitalMarketing.Services.IssueSection ?? Model.Sections.FirstOrDefault() ?? new();
+    var currentIndex = (int)(ViewBag.SectionIndex ?? 1);
+    var totalSections = (int)(ViewBag.TotalSections ?? Model.Sections.Count);
+    var progressPct = totalSections > 0 ? (int)Math.Round((double)currentIndex / totalSections * 100) : 100;
+    ViewData["Title"] = $"{Model.Title} - Digital Reader";
+
+    var prevSection = Model.Sections.TakeWhile(s => s.Id != activeSection.Id).LastOrDefault();
+    var nextSection = Model.Sections.SkipWhile(s => s.Id != activeSection.Id).Skip(1).FirstOrDefault();
+
+    // If locked, only Section 1 can be previewed as a free sample
+    var isSamplePreview = !isUnlocked && currentIndex == 1;
+    var isPaywallBlocked = !isUnlocked && currentIndex > 1;
+}
+
+<div class="container-fluid py-3 px-lg-4">
+    <!-- Udemy-Style Reader Top Bar -->
+    <div class="modern-card p-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Index" class="btn btn-pill-outline btn-sm py-1 px-3" title="Back to Library">
+                <i class="bi bi-arrow-left me-1"></i> Library
+            </a>
+            <div>
+                <h5 class="fw-bold mb-0 font-display d-flex align-items-center gap-2">
+                    @Model.Title
+                    @if (isUnlocked)
+                    {
+                        <span class="badge bg-success text-white rounded-pill px-2 py-1 small" style="font-size: 0.7rem;">
+                            <i class="bi bi-unlock-fill me-1"></i> Full Access
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary text-white rounded-pill px-2 py-1 small" style="font-size: 0.7rem;">
+                            <i class="bi bi-lock-fill me-1"></i> Sample Preview Mode
+                        </span>
+                    }
+                </h5>
+                <small class="text-muted">@Model.IssueNumber • Official Publications Division Repository</small>
+            </div>
+        </div>
+
+        <!-- Controls: Progress Bar & Reading Customization -->
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            @if (isUnlocked)
+            {
+                <div class="d-none d-md-flex flex-column text-end" style="min-width: 160px;">
+                    <div class="small fw-semibold text-muted mb-1">Progress: Module @currentIndex of @totalSections (@progressPct%)</div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: @progressPct%;"></div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill">
+                        Locked • ₹@productPrice
+                    </span>
+                    <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.ProductId" class="btn btn-ink btn-sm py-2 px-3">
+                        <i class="bi bi-unlock-fill me-1"></i> Unlock Now
+                    </a>
+                </div>
+            }
+
+            <!-- Reading Theme Mode Pill (Light / Sepia / Dark) -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-pill-outline" onclick="setReaderTheme('default')" title="Default Theme">Standard</button>
+                <button type="button" class="btn btn-pill-outline" onclick="setReaderTheme('sepia')" style="background: #fbf0d9; color: #5f4b32;" title="Sepia Mode">Sepia</button>
+                <button type="button" class="btn btn-pill-outline" onclick="setReaderTheme('darkreader')" style="background: #181a1b; color: #e8e6e3;" title="Dark Reader">Dark</button>
+            </div>
+
+            @if (isUnlocked)
+            {
+                <button type="button" onclick="alert('Full official gazette PDF download started.');" class="btn btn-ink btn-sm py-2 px-3">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Main Reader Workspace (Udemy Course Player Layout) -->
+    <div class="row g-4">
+        
+        <!-- Left Sidebar: Curriculum / Sections Drawer -->
+        <div class="col-lg-4 col-xl-3">
+            <div class="modern-card p-3 h-100 sticky-top" style="top: 80px; max-height: calc(100vh - 100px); overflow-y: auto;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <span class="fw-bold text-uppercase small text-muted" style="letter-spacing: 0.05em;">Table of Contents</span>
+                    <span class="badge bg-light text-secondary border rounded-pill">@Model.Sections.Count Sections</span>
+                </div>
+
+                <div class="list-group list-group-flush gap-2">
+                    @for (int i = 0; i < Model.Sections.Count; i++)
+                    {
+                        var s = Model.Sections[i];
+                        var isActive = s.Id == activeSection.Id;
+                        var isSectionLocked = !isUnlocked && i > 0; // Section 1 is sample preview, 2+ are locked
+
+                        <a asp-action="Read" asp-route-id="@Model.ProductId" asp-route-section="@s.Id" 
+                           class="list-group-item list-group-item-action rounded-3 p-3 border-0 d-flex align-items-start gap-2 @(isActive ? "active text-white" : "bg-light")"
+                           style="@(isActive ? "background: var(--color-ink); color: #fff;" : "")">
+                            
+                            @if (isSectionLocked)
+                            {
+                                <i class="bi bi-lock-fill text-muted fs-6 mt-1"></i>
+                            }
+                            else
+                            {
+                                <i class="bi @s.Icon fs-5 mt-1 @(isActive ? "text-warning" : "text-muted")"></i>
+                            }
+
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="fw-bold small text-truncate">
+                                    @s.Title
+                                    @if (isSectionLocked)
+                                    {
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">LOCKED</span>
+                                    }
+                                </div>
+                                <div class="small @(isActive ? "text-white-50" : "text-muted")" style="font-size: 0.72rem;">
+                                    <i class="bi bi-clock me-1"></i> @s.Duration
+                                </div>
+                            </div>
+
+                            @if (isUnlocked && i < currentIndex - 1)
+                            {
+                                <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                            }
+                        </a>
+                    }
+                </div>
+
+                @if (!isUnlocked)
+                {
+                    <div class="p-3 rounded-4 bg-warning-subtle text-dark border border-warning-subtle mt-4 text-center">
+                        <i class="bi bi-shield-lock-fill fs-4 d-block mb-1 text-warning"></i>
+                        <div class="fw-bold small">Unlock All Modules</div>
+                        <p class="small text-muted mb-2">Purchase to unlock remaining @(Model.Sections.Count - 1) sections and PDF download.</p>
+                        <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.ProductId" class="btn btn-ink btn-sm w-100 py-2">
+                            Unlock for ₹@productPrice
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right Reading Canvas Area -->
+        <div class="col-lg-8 col-xl-9">
+            <div class="modern-card p-4 p-md-5 position-relative" id="readingCanvas" style="min-height: 650px;">
+                
+                @if (isPaywallBlocked)
+                {
+                    <!-- Udemy-Style Locked Paywall Screen -->
+                    <div class="text-center py-5 my-4">
+                        <div class="mb-3 text-warning">
+                            <i class="bi bi-shield-lock-fill" style="font-size: 4rem;"></i>
+                        </div>
+                        <h3 class="fw-bold font-display mb-2">This Section Is Locked</h3>
+                        <p class="text-muted col-md-8 mx-auto mb-4">
+                            You have not purchased <strong>@Model.Title</strong> yet. To read beyond the sample preview, access full vacancy tables, exam schemes, and official gazette PDFs, please unlock this issue.
+                        </p>
+
+                        <div class="p-4 rounded-4 bg-light border col-md-7 mx-auto mb-4 text-start">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-0">Official Digital Issue</h5>
+                                    <small class="text-muted">Lifetime online reading access</small>
+                                </div>
+                                <div class="fs-3 fw-bold text-primary font-display">₹@productPrice</div>
+                            </div>
+                            <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-muted">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> All @Model.Sections.Count comprehensive recruitment & policy modules</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Downloadable high-resolution Gazette PDF</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Offline sync & mobile reading optimization</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                            <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.ProductId" class="btn btn-ink py-3 px-4">
+                                <i class="bi bi-lightning-charge-fill me-1"></i> Unlock Now for ₹@productPrice
+                            </a>
+                            <button type="button" class="btn btn-pill-outline py-3 px-4" onclick="addToCartAjax(@Model.ProductId, this)">
+                                <i class="bi bi-bag-plus me-1"></i> Add to Bag
+                            </button>
+                            <a asp-action="Read" asp-route-id="@Model.ProductId" asp-route-section="overview" class="btn btn-pill-outline py-3 px-4">
+                                Read Sample Preview (Section 1)
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Section Header -->
+                    <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom flex-wrap gap-2">
+                        <div>
+                            @if (!isUnlocked)
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold small mb-2 d-inline-block">
+                                    <i class="bi bi-eye-fill me-1"></i> Free Sample Preview (Section 1 of @totalSections)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-1 fw-bold small mb-2 d-inline-block">
+                                    <i class="bi bi-unlock-fill me-1"></i> Section @currentIndex of @totalSections
+                                </span>
+                            }
+                            <h2 class="fw-bold font-display mb-1">@activeSection.Title</h2>
+                            <div class="text-muted small">
+                                <i class="bi bi-stopwatch me-1"></i> Estimated reading time: @activeSection.Duration
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-pill-outline btn-sm" onclick="adjustFontSize(-1)" title="Decrease font size">A-</button>
+                            <button type="button" class="btn btn-pill-outline btn-sm" onclick="adjustFontSize(1)" title="Increase font size">A+</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Rendered Section Content -->
+                    <div class="reading-body mb-5" id="readerText" style="font-size: 1.05rem; line-height: 1.8;">
+                        @Html.Raw(activeSection.HtmlContent)
+                    </div>
+
+                    <!-- Bottom Navigation Bar (Previous / Next / Complete) -->
+                    <div class="d-flex justify-content-between align-items-center pt-4 border-top flex-wrap gap-3">
+                        <div>
+                            @if (prevSection != null)
+                            {
+                                <a asp-action="Read" asp-route-id="@Model.ProductId" asp-route-section="@prevSection.Id" class="btn btn-pill-outline py-2 px-3">
+                                    <i class="bi bi-arrow-left me-1"></i> Previous Section
+                                </a>
+                            }
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            @if (nextSection != null)
+                            {
+                                @if (isUnlocked)
+                                {
+                                    <a asp-action="Read" asp-route-id="@Model.ProductId" asp-route-section="@nextSection.Id" class="btn btn-ink py-2 px-4">
+                                        <span>Complete & Next Section</span>
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Read" asp-route-id="@Model.ProductId" asp-route-section="@nextSection.Id" class="btn btn-warning rounded-pill py-2 px-4 fw-bold text-dark">
+                                        <i class="bi bi-lock-fill me-1"></i> Unlock Next Section (₹@productPrice)
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <a asp-action="Index" class="btn btn-success rounded-pill py-2 px-4 fw-bold">
+                                    <i class="bi bi-check-all me-1"></i> Finished Issue! Back to Library
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentFontSize = 1.05;
+
+        function adjustFontSize(delta) {
+            currentFontSize += (delta * 0.1);
+            if (currentFontSize < 0.85) currentFontSize = 0.85;
+            if (currentFontSize > 1.45) currentFontSize = 1.45;
+            const el = document.getElementById('readerText');
+            if (el) el.style.fontSize = currentFontSize + 'rem';
+        }
+
+        function setReaderTheme(mode) {
+            const canvas = document.getElementById('readingCanvas');
+            if (!canvas) return;
+
+            if (mode === 'sepia') {
+                canvas.style.backgroundColor = '#fbf0d9';
+                canvas.style.color = '#382c1e';
+            } else if (mode === 'darkreader') {
+                canvas.style.backgroundColor = '#181a1b';
+                canvas.style.color = '#e8e6e3';
+            } else {
+                canvas.style.backgroundColor = '';
+                canvas.style.color = '';
+            }
+        }
+    </script>
+}

@@ -1,0 +1,245 @@
+@{
+    ViewData["Title"] = "Official DPD Journals & Employment News Portal";
+    var employmentNews = ViewBag.EmploymentNews as List<DPDDigitalMarketing.Models.Product> ?? new();
+    var journals = ViewBag.Journals as List<DPDDigitalMarketing.Models.Product> ?? new();
+}
+
+<div class="container hero-wrapper">
+    <div class="row align-items-center g-5 py-3 py-lg-4">
+        
+        <!-- Left Hero Content -->
+        <div class="col-lg-6">
+            <div class="d-inline-flex align-items-center gap-2 mb-3">
+                <span class="badge-pill-orange">
+                    <i class="bi bi-patch-check-fill me-1"></i> OFFICIAL DPD EDITIONS
+                </span>
+            </div>
+
+            <h1 class="display-3 font-display mb-3" style="line-height: 1.05;">
+                PUBLICATIONS<br />
+                TO BE<br />
+                NOTICED.
+            </h1>
+
+            <p class="text-muted fs-6 col-md-11 mb-4" style="line-height: 1.65;">
+                Official digital marketing & publication platform of the Government of India. Access weekly <strong>Employment News</strong> notifications, prestigious journals like <strong>Yojana</strong> and <strong>Kurukshetra</strong>, and cultural classics.
+            </p>
+
+            <!-- Action Buttons (Exact style as screenshot) -->
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-4">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-ink py-3 px-4">
+                    <span>Start Reading</span>
+                    <span class="badge-verified-check">
+                        <i class="bi bi-arrow-right"></i>
+                    </span>
+                </a>
+                <a asp-controller="Product" asp-action="Index" asp-route-category="EmploymentNews" class="btn btn-yellow-pill py-3 px-4">
+                    <i class="bi bi-play-fill fs-5"></i>
+                    <span>What's Trending?</span>
+                </a>
+            </div>
+
+            <!-- Quick Trust Proof -->
+            <div class="d-flex align-items-center flex-wrap gap-3 pt-2 text-muted small">
+                <div><i class="bi bi-shield-check text-success me-1"></i> Official GoI Source</div>
+                <div class="d-none d-sm-inline">•</div>
+                <div><i class="bi bi-truck text-primary me-1"></i> Pan-India Postal Delivery</div>
+                <div class="d-none d-sm-inline">•</div>
+                <div><i class="bi bi-file-earmark-pdf text-danger me-1"></i> Instant Digital Editions</div>
+            </div>
+        </div>
+
+        <!-- Right Hero Visual Showcase (Editorial Book Showcase Composition) -->
+        <div class="col-lg-6 text-center mt-5 mt-lg-0">
+            <div class="position-relative d-inline-block" style="max-width: 100%;">
+                
+                <!-- Background Accent Geometry -->
+                <div style="position: absolute; width: 300px; height: 380px; background: #fb923c; border-radius: 36px; right: 15px; bottom: 0px; z-index: 1; transform: rotate(3deg);"></div>
+                <div style="position: absolute; width: 130px; height: 130px; background: #fef08a; border-radius: 50%; left: -10px; top: 15px; z-index: 1;"></div>
+
+                <!-- Main Hero Character / Cover Visual (Professional Editorial Stack) -->
+                <div class="position-relative" style="z-index: 2;">
+                    <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80" 
+                         alt="Publications Division Official Repository" 
+                         class="rounded-5 shadow-lg" 
+                         style="width: 340px; height: 420px; object-fit: cover; max-width: 100%; border: 4px solid var(--color-surface);" />
+                </div>
+
+                <!-- Floating Product Showcase Card (Matches yellow card in reference design) -->
+                <div class="floating-product-tag position-absolute text-start d-none d-sm-block" style="top: 18%; left: -12%; z-index: 3;">
+                    <div class="position-relative mb-2">
+                        <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=300&auto=format&fit=crop&q=60" 
+                             class="rounded-3 w-100" style="height: 105px; object-fit: cover;" alt="Employment News" />
+                        <span class="badge-verified-check position-absolute bottom-0 end-0 translate-middle-y me-1 mb-1">
+                            <i class="bi bi-check"></i>
+                        </span>
+                    </div>
+                    <div class="fw-bold small mb-0">Employment News</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Weekly Govt Vacancies</div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="fw-bold fs-6">₹20.00</span>
+                        <button type="button" class="btn btn-sm btn-dark rounded-pill px-2 py-0 fw-semibold" onclick="addToCartAjax(1, this)" style="font-size: 0.72rem;">
+                            <i class="bi bi-bag-plus me-1"></i>+ Add
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Small Floating Accent Badge -->
+                <div class="position-absolute p-2 bg-white rounded-circle shadow" style="bottom: 8%; left: 8%; z-index: 3;">
+                    <span class="badge bg-warning text-dark rounded-circle p-2">
+                        <i class="bi bi-award-fill"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dark Category Strip (Fixed: Kurukshetra & Yojana now link directly!) -->
+    <div class="dark-category-strip my-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-dark rounded-pill px-3 py-2 fw-bold text-uppercase" style="letter-spacing: 0.08em; font-size: 0.75rem;">
+                    <i class="bi bi-sliders me-1"></i> FEATURED CHANNELS
+                </span>
+                <span class="text-white-50 small d-none d-md-inline">• Click any publication to explore</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle" style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle" style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+            <!-- 1. Employment News -->
+            <div class="col">
+                <a asp-controller="Product" asp-action="Index" asp-route-category="EmploymentNews" class="category-mini-card">
+                    <div class="category-icon-box bg-warning text-dark">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white">Employment News</div>
+                        <div class="text-white-50 small">Govt Jobs <i class="bi bi-arrow-right-short"></i></div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 2. Yojana (Direct Page) -->
+            <div class="col">
+                <a asp-controller="Product" asp-action="Details" asp-route-id="3" class="category-mini-card">
+                    <div class="category-icon-box bg-primary text-white">
+                        <i class="bi bi-book-half"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white">Yojana Journal</div>
+                        <div class="text-white-50 small">Socio-Economic <i class="bi bi-arrow-right-short"></i></div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 3. Kurukshetra (Direct Page) -->
+            <div class="col">
+                <a asp-controller="Product" asp-action="Details" asp-route-id="4" class="category-mini-card">
+                    <div class="category-icon-box bg-success text-white">
+                        <i class="bi bi-tree-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white">Kurukshetra</div>
+                        <div class="text-white-50 small">Rural Economy <i class="bi bi-arrow-right-short"></i></div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 4. Amazon & Flipkart Store -->
+            <div class="col">
+                <a asp-controller="Order" asp-action="SalesHistory" class="category-mini-card">
+                    <div class="category-icon-box bg-danger text-white">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white">Marketplace Stores</div>
+                        <div class="text-white-50 small">Amazon & Flipkart <i class="bi bi-arrow-right-short"></i></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Job Alerts Newsletter Subscription Box -->
+    <div class="modern-card p-4 p-md-5 mb-5" style="background: linear-gradient(135deg, var(--color-surface) 0%, rgba(249, 115, 22, 0.08) 100%);">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <span class="badge-pill-orange mb-2 d-inline-block">EMAIL MARKETING & ALERTS</span>
+                <h3 class="fw-bold font-display mb-2">Never Miss a Government Vacancy.</h3>
+                <p class="text-muted mb-0">
+                    Get Saturday morning email blasts with all UPSC, SSC, Banking & State job notifications directly in your inbox.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <form asp-controller="Newsletter" asp-action="Subscribe" method="post" class="d-flex flex-column flex-sm-row gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="email" name="email" class="form-control form-control-pill flex-grow-1" placeholder="Enter your email address..." required />
+                    <button type="submit" class="btn btn-ink py-2 px-4 text-nowrap">
+                        <span>Subscribe Free</span>
+                        <i class="bi bi-send-fill ms-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Publications Grid: Curated (Includes Kurukshetra & Yojana & Employment News) -->
+    <div class="my-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="badge-pill-dark mb-2 d-inline-block">CURATED ISSUES</span>
+                <h3 class="fw-bold font-display mb-0">Trending This Month</h3>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-pill-outline btn-sm">Explore Entire Catalog</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var item in (ViewBag.CuratedTrio as List<DPDDigitalMarketing.Models.Product> ?? new List<DPDDigitalMarketing.Models.Product>()))
+            {
+                <div class="col">
+                    <div class="modern-card h-100 p-3 d-flex flex-column">
+                        <div class="position-relative mb-3 overflow-hidden rounded-4">
+                            <img src="@item.CoverImageUrl" class="w-100 img-hover-zoom" style="height: 220px; object-fit: cover;" alt="@item.Title" />
+                            <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-1 fw-bold small">
+                                @item.Category
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-light text-secondary border rounded-pill">@item.Language Edition</span>
+                            <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> In Stock</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">@item.Title</h5>
+                        <p class="text-muted small flex-grow-1 mb-3">
+                            @(item.Description.Length > 90 ? item.Description.Substring(0, 90) + "..." : item.Description)
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <div>
+                                <span class="fs-4 fw-bold">₹@item.Price</span>
+                                <span class="text-muted small">/ copy</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-pill-outline btn-sm py-2 px-3" onclick="addToCartAjax(@item.Id, this)" title="Add to Bag">
+                                    <i class="bi bi-bag-plus"></i> <span class="d-none d-sm-inline ms-1">Bag</span>
+                                </button>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-ink btn-sm py-2 px-3">
+                                    <span>Details</span>
+                                    <i class="bi bi-arrow-right-short"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

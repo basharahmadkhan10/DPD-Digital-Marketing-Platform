@@ -1,0 +1,90 @@
+@model DPDDigitalMarketing.Models.Product
+@{
+    ViewData["Title"] = "Add New Publication / Issue";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">Add Publication / Issue</h4>
+                <small class="text-muted">Register a new Employment News edition or DPD journal issue.</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold">Title / Issue Name</label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g. Employment News 20-26 Nov 2026 Issue" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Category" class="form-label fw-semibold">Category</label>
+                            <select asp-for="Category" class="form-select">
+                                <option value="EmploymentNews">Employment News</option>
+                                <option value="Journal">Journal (Yojana/Kurukshetra)</option>
+                                <option value="Book">Book</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Language" class="form-label fw-semibold">Language</label>
+                            <select asp-for="Language" class="form-select">
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Urdu">Urdu</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Price" class="form-label fw-semibold">Price (₹)</label>
+                            <input asp-for="Price" type="number" step="0.5" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold">Description / Key Highlights</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Major vacancies, exam dates, articles featured..."></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CoverImageUrl" class="form-label fw-semibold">Cover Image URL</label>
+                            <input asp-for="CoverImageUrl" class="form-control" placeholder="https://..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="StockQuantity" class="form-label fw-semibold">Stock Quantity</label>
+                            <input asp-for="StockQuantity" type="number" class="form-control" value="200" />
+                        </div>
+                    </div>
+
+                    <!-- Multi-channel eCommerce links -->
+                    <h6 class="fw-bold mt-4 mb-2">Multi-Channel Sales Links</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="AmazonUrl" class="form-label fw-semibold">Amazon India Product URL</label>
+                            <input asp-for="AmazonUrl" class="form-control" placeholder="https://amazon.in/dp/..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FlipkartUrl" class="form-label fw-semibold">Flipkart Product URL</label>
+                            <input asp-for="FlipkartUrl" class="form-control" placeholder="https://flipkart.com/..." />
+                        </div>
+                    </div>
+
+                    <!-- SEO settings -->
+                    <h6 class="fw-bold mt-4 mb-2">SEO Optimization</h6>
+                    <div class="mb-3">
+                        <label asp-for="MetaKeywords" class="form-label fw-semibold">Meta Keywords (Comma separated)</label>
+                        <input asp-for="MetaKeywords" class="form-control" placeholder="e.g. employment news, upsc syllabus, yojana nov" />
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Save Publication</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,152 @@
+@model List<DPDDigitalMarketing.Services.DigitalIssue>
+@{
+    ViewData["Title"] = "My Digital Library & Reader";
+    var unlockedIds = ViewBag.UnlockedIds as HashSet<int> ?? new HashSet<int>();
+    var unlockedIssues = Model.Where(i => unlockedIds.Contains(i.ProductId)).ToList();
+    var lockedIssues = Model.Where(i => !unlockedIds.Contains(i.ProductId)).ToList();
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="badge-pill-orange mb-1 d-inline-block">DIGITAL LEARNING & READER HUB</span>
+            <h2 class="fw-bold font-display mb-0">My Digital Library</h2>
+            <p class="text-muted small">Udemy-style access: Only publications you have purchased are unlocked for full reading.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Product" asp-action="Index" class="btn btn-pill-outline btn-sm">
+                <i class="bi bi-cart-plus me-1"></i> Browse Catalog
+            </a>
+            <a asp-controller="Order" asp-action="SalesHistory" class="btn btn-ink btn-sm">
+                <i class="bi bi-receipt me-1"></i> Order History
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Strip -->
+    <div class="modern-card p-3 mb-4 bg-light">
+        <div class="row g-3 text-center">
+            <div class="col-sm-4 border-end">
+                <div class="fs-4 fw-bold text-success font-display">
+                    <i class="bi bi-unlock-fill me-1"></i> @unlockedIssues.Count
+                </div>
+                <div class="text-muted small">Unlocked & Ready to Read</div>
+            </div>
+            <div class="col-sm-4 border-end">
+                <div class="fs-4 fw-bold text-muted font-display">
+                    <i class="bi bi-lock-fill me-1"></i> @lockedIssues.Count
+                </div>
+                <div class="text-muted small">Locked (Purchase Required)</div>
+            </div>
+            <div class="col-sm-4">
+                <div class="fs-4 fw-bold text-primary font-display">@Model.Count Total</div>
+                <div class="text-muted small">Official DPD Publications</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Unlocked Issues (Paid / Purchased) -->
+    <div class="mb-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold small">
+                <i class="bi bi-patch-check-fill me-1"></i> UNLOCKED
+            </span>
+            <h4 class="fw-bold font-display mb-0">My Purchased Editions (@unlockedIssues.Count)</h4>
+        </div>
+
+        @if (!unlockedIssues.Any())
+        {
+            <div class="modern-card p-4 text-center my-3 border border-dashed">
+                <div class="text-muted fs-3 mb-2"><i class="bi bi-lock"></i></div>
+                <h6 class="fw-bold">No unlocked publications yet</h6>
+                <p class="text-muted small mb-3">When you purchase an issue from the catalog or checkout, it unlocks here immediately with lifetime access.</p>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-ink btn-sm">Browse Catalog & Unlock Issues</a>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var issue in unlockedIssues)
+                {
+                    <div class="col">
+                        <div class="modern-card h-100 p-3 d-flex flex-column border-2 border-success" style="box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);">
+                            <div class="position-relative mb-3 overflow-hidden rounded-4">
+                                <img src="@issue.CoverImageUrl" class="w-100" style="height: 190px; object-fit: cover;" alt="@issue.Title" />
+                                <span class="badge bg-success text-white position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-1 fw-bold small">
+                                    <i class="bi bi-unlock-fill me-1"></i> Unlocked
+                                </span>
+                                <span class="badge bg-dark text-white position-absolute bottom-0 end-0 m-3 shadow-sm rounded-pill px-2 py-1 small" style="font-size: 0.7rem;">
+                                    @issue.Sections.Count Modules
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-light text-secondary border rounded-pill">@issue.Language Edition</span>
+                                <span class="text-success small fw-bold"><i class="bi bi-check-circle-fill"></i> Full Access</span>
+                            </div>
+
+                            <h5 class="fw-bold mb-2">@issue.Title</h5>
+                            <p class="text-muted small mb-3 flex-grow-1">
+                                Full access to all recruitment tables, exam syllabuses, and downloadable official gazette PDF.
+                            </p>
+
+                            <div class="d-grid gap-2 pt-2 border-top mt-auto">
+                                <a asp-action="Read" asp-route-id="@issue.ProductId" class="btn btn-ink py-2 justify-content-center">
+                                    <i class="bi bi-play-circle-fill fs-5"></i>
+                                    <span>Start Reading Online</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Section 2: Locked Issues (Available for Purchase) -->
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-secondary rounded-pill px-3 py-1 fw-bold small">
+                <i class="bi bi-lock-fill me-1"></i> LOCKED
+            </span>
+            <h4 class="fw-bold font-display mb-0">Available to Unlock in Catalog (@lockedIssues.Count)</h4>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var issue in lockedIssues)
+            {
+                <div class="col">
+                    <div class="modern-card h-100 p-3 d-flex flex-column" style="opacity: 0.95;">
+                        <div class="position-relative mb-3 overflow-hidden rounded-4">
+                            <img src="@issue.CoverImageUrl" class="w-100" style="height: 180px; object-fit: cover; filter: grayscale(15%);" alt="@issue.Title" />
+                            <span class="badge bg-dark text-white position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-1 fw-bold small">
+                                <i class="bi bi-lock-fill me-1"></i> Locked
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-light text-secondary border rounded-pill">@issue.Language</span>
+                            <span class="text-muted small"><i class="bi bi-shield-lock"></i> Purchase required</span>
+                        </div>
+
+                        <h6 class="fw-bold mb-2">@issue.Title</h6>
+                        <p class="text-muted small mb-3 flex-grow-1">
+                            Purchase this issue to unlock all @issue.Sections.Count sections, vacancy charts, and official PDF download.
+                        </p>
+
+                        <div class="d-flex gap-2 pt-2 border-top mt-auto">
+                            <a asp-action="Read" asp-route-id="@issue.ProductId" class="btn btn-pill-outline btn-sm py-2 px-3 text-nowrap" title="Preview Sample">
+                                <i class="bi bi-eye"></i> Sample
+                            </a>
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@issue.ProductId" class="btn btn-ink btn-sm py-2 px-3 flex-grow-1 text-center justify-content-center">
+                                <i class="bi bi-unlock me-1"></i> Unlock
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

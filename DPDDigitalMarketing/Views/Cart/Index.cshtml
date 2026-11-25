@@ -1,0 +1,156 @@
+@model List<DPDDigitalMarketing.Models.CartItem>
+@{
+    ViewData["Title"] = "Shopping Bag";
+    var subtotal = Model.Sum(i => i.Total);
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge-pill-orange mb-1 d-inline-block">ORDER SELECTION</span>
+            <h2 class="fw-bold font-display mb-0">Shopping Bag</h2>
+            <p class="text-muted small">Review your selected journals and weekly issues before placing the order.</p>
+        </div>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-pill-outline btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Add More Issues
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="modern-card p-5 text-center my-4">
+            <div class="mb-3 text-muted">
+                <i class="bi bi-bag-x" style="font-size: 3.5rem;"></i>
+            </div>
+            <h4 class="fw-bold font-display">Your bag is empty</h4>
+            <p class="text-muted small col-md-6 mx-auto mb-4">
+                Explore our catalog to add Employment News recruitment notices, Yojana, Kurukshetra, or literature journals.
+            </p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-ink py-3 px-4">
+                <span>Browse Publications</span>
+                <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Left Items List -->
+            <div class="col-lg-8">
+                <div class="modern-card p-4">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="rounded-start">Publication</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                    <th class="rounded-end text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@item.CoverImageUrl" alt="@item.Title" class="rounded-3 shadow-sm" style="width: 55px; height: 75px; object-fit: cover;" />
+                                                <div>
+                                                    <span class="badge bg-light text-secondary border rounded-pill mb-1" style="font-size: 0.65rem;">@item.Category</span>
+                                                    <h6 class="fw-bold mb-0">@item.Title</h6>
+                                                    <small class="text-muted">@item.Language Edition</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="fw-semibold">₹@item.Price</td>
+                                        <td>
+                                            <!-- Quantity Selector -->
+                                            <div class="d-inline-flex align-items-center border rounded-pill px-2 py-1 bg-light">
+                                                <form asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                                    <input type="hidden" name="delta" value="-1" />
+                                                    <button type="submit" class="btn btn-link btn-sm p-0 text-dark text-decoration-none" title="Decrease">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                </form>
+                                                <span class="mx-2 fw-bold small">@item.Quantity</span>
+                                                <form asp-action="UpdateQuantity" method="post" class="d-inline">
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                                    <input type="hidden" name="delta" value="1" />
+                                                    <button type="submit" class="btn btn-link btn-sm p-0 text-dark text-decoration-none" title="Increase">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        <td class="fw-bold text-success">₹@item.Total</td>
+                                        <td class="text-end">
+                                            <form asp-action="Remove" method="post" class="d-inline">
+                                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" title="Remove">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Summary Box -->
+            <div class="col-lg-4">
+                <div class="modern-card p-4">
+                    <h5 class="fw-bold font-display mb-3">Order Summary</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Items:</span>
+                        <span class="fw-semibold">@Model.Sum(i => i.Quantity) copies</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Items Subtotal:</span>
+                        <span class="fw-semibold">₹@subtotal</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Postal Charges:</span>
+                        <span class="text-success fw-bold">FREE (Govt Service)</span>
+                    </div>
+
+                    <div class="border-top pt-3 my-3 d-flex justify-content-between align-items-center">
+                        <span class="fs-5 fw-bold font-display">Total Amount:</span>
+                        <span class="fs-3 fw-bold text-primary font-display">₹@subtotal</span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <a asp-controller="Order" asp-action="Checkout" class="btn btn-ink py-3 justify-content-center">
+                                <span>Proceed to Checkout</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Order/Checkout" class="btn btn-ink py-3 justify-content-center">
+                                <i class="bi bi-lock-fill me-1"></i>
+                                <span>Log in to Checkout</span>
+                            </a>
+                            <div class="text-center small text-muted mt-1">
+                                Don't have an account? <a asp-controller="Account" asp-action="Register" asp-route-returnUrl="/Order/Checkout" class="fw-bold text-dark text-decoration-none">Sign up free</a>
+                            </div>
+                        }
+                        <small class="text-muted text-center mt-2">
+                            <i class="bi bi-shield-check text-success me-1"></i> Official DPD checkout with instant digital issue unlock
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
