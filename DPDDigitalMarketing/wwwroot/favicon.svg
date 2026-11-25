@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Dark navy background -->
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <!-- Orange accent bar on left -->
+  <rect x="8" y="12" width="5" height="40" rx="2.5" fill="#f97316"/>
+  <!-- Book pages representation -->
+  <rect x="17" y="14" width="30" height="36" rx="3" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <rect x="20" y="17" width="24" height="30" rx="2" fill="#f8fafc"/>
+  <!-- Lines on book (pages) -->
+  <rect x="23" y="22" width="16" height="2" rx="1" fill="#94a3b8"/>
+  <rect x="23" y="27" width="18" height="2" rx="1" fill="#94a3b8"/>
+  <rect x="23" y="32" width="14" height="2" rx="1" fill="#94a3b8"/>
+  <rect x="23" y="37" width="17" height="2" rx="1" fill="#94a3b8"/>
+  <!-- Orange dot accent -->
+  <circle cx="51" cy="13" r="7" fill="#f97316"/>
+  <text x="48" y="17" font-family="Arial" font-size="9" font-weight="bold" fill="white">D</text>
+</svg>
