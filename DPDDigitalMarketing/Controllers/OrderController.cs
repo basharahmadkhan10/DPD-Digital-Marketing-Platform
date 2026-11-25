@@ -12,11 +12,16 @@ namespace DPDDigitalMarketing.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailMarketingService _emailService;
 
-        public OrderController(AppDbContext context, UserManager<ApplicationUser> userManager)
+        public OrderController(
+            AppDbContext context,
+            UserManager<ApplicationUser> userManager,
+            IEmailMarketingService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         [Authorize]
@@ -113,7 +118,9 @@ namespace DPDDigitalMarketing.Controllers
 
             CartSessionHelper.ClearCart(HttpContext.Session);
 
-            TempData["SuccessMessage"] = $"Thank you! Order #{order.Id} placed successfully via {order.SaleChannel}.";
+            await _emailService.SendOrderConfirmationEmailAsync(order, cart);
+
+            TempData["SuccessMessage"] = $"Thank you! Order #{order.Id} placed successfully via {order.SaleChannel}. Confirmation email sent!";
             return RedirectToAction(nameof(Confirmation), new { id = order.Id });
         }
 

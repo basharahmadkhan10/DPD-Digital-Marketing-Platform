@@ -164,5 +164,71 @@ namespace DPDDigitalMarketing.Services
 
             return recipients.Count;
         }
+
+        public Task SendOrderConfirmationEmailAsync(Order order, List<CartItem> items)
+        {
+            if (string.IsNullOrWhiteSpace(order.CustomerEmail))
+            {
+                return Task.CompletedTask;
+            }
+
+            var baseUrl = _config["AppBaseUrl"] ?? "https://dpd-digital-marketing-platform-1.onrender.com";
+            var customerName = WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(order.CustomerName) ? "Valued Reader" : order.CustomerName);
+
+            var rowsHtml = string.Join("", items.Select(item => $@"
+                <tr>
+                    <td style='padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #1e293b;'>
+                        <b>{WebUtility.HtmlEncode(item.Title)}</b><br/>
+                        <span style='color: #64748b; font-size: 11px;'>{WebUtility.HtmlEncode(item.Category)} • {WebUtility.HtmlEncode(item.Language)}</span>
+                    </td>
+                    <td style='padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #334155; text-align: center;'>{item.Quantity}</td>
+                    <td style='padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #0f172a; font-weight: bold; text-align: right;'>&#8377;{item.Total:0.00}</td>
+                </tr>"));
+
+            var orderHtml = $@"
+<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;'>
+    <div style='background-color: #0f172a; padding: 18px; border-radius: 8px; text-align: center;'>
+        <h2 style='color: #ffffff; margin: 0; font-size: 20px;'>Publications Division (DPD)</h2>
+        <p style='color: #f97316; margin: 6px 0 0 0; font-size: 13px; font-weight: bold;'>Order Confirmed • Digital Edition Unlocked</p>
+    </div>
+    <div style='padding: 24px 8px;'>
+        <h3 style='color: #16a34a; margin-top: 0;'>&#10004; Thank you for your order, {customerName}!</h3>
+        <p style='color: #475569; font-size: 14px; line-height: 1.6;'>Your payment is confirmed and your digital publications are now unlocked in your <b>My Library</b> section.</p>
+
+        <div style='background-color: #f8fafc; border-left: 4px solid #f97316; padding: 12px 16px; margin: 18px 0; border-radius: 4px;'>
+            <div style='font-size: 13px; color: #334155;'><b>Order ID:</b> #DPD-{order.Id}</div>
+            <div style='font-size: 13px; color: #334155;'><b>Order Date:</b> {order.OrderDate:dd MMM yyyy, hh:mm tt} UTC</div>
+            <div style='font-size: 13px; color: #334155;'><b>Channel:</b> {WebUtility.HtmlEncode(order.SaleChannel)}</div>
+            <div style='font-size: 13px; color: #334155;'><b>Total Paid:</b> <span style='color: #0f172a; font-weight: bold;'>&#8377;{order.TotalAmount:0.00}</span></div>
+        </div>
+
+        <table style='width: 100%; border-collapse: collapse; margin: 16px 0;'>
+            <thead>
+                <tr style='background-color: #f1f5f9;'>
+                    <th style='padding: 10px 8px; text-align: left; font-size: 12px; color: #475569;'>Publication</th>
+                    <th style='padding: 10px 8px; text-align: center; font-size: 12px; color: #475569;'>Qty</th>
+                    <th style='padding: 10px 8px; text-align: right; font-size: 12px; color: #475569;'>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rowsHtml}
+            </tbody>
+        </table>
+
+        <div style='margin: 26px 0; text-align: center;'>
+            <a href='{baseUrl}/Library' target='_blank' rel='noopener noreferrer' style='background-color: #0f172a; color: #ffffff; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; margin: 4px;'>Read in My Library</a>
+            <a href='{baseUrl}/Order/Confirmation/{order.Id}' target='_blank' rel='noopener noreferrer' style='background-color: #f97316; color: #ffffff; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; margin: 4px;'>View Order Receipt</a>
+        </div>
+
+        <p style='color: #94a3b8; font-size: 12px; margin-top: 25px;'>This is an official order confirmation email from the DPD Digital Marketing Platform.</p>
+    </div>
+</div>";
+
+            var recipient = order.CustomerEmail;
+            var orderId = order.Id;
+            _ = Task.Run(() => SendMailtrapEmailAsync(recipient, $"Order Confirmed #DPD-{orderId} - Publications Division (DPD)", orderHtml));
+
+            return Task.CompletedTask;
+        }
     }
 }
