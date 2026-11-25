@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DPDDigitalMarketing.Data;
@@ -8,6 +9,7 @@ namespace DPDDigitalMarketing.Controllers.Api
 
     [Route("api/analytics")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class AnalyticsApiController : ControllerBase
     {
         private readonly AppDbContext _context;

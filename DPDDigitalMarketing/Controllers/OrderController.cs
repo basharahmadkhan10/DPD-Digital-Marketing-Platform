@@ -82,7 +82,7 @@ namespace DPDDigitalMarketing.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
-                if (string.IsNullOrEmpty(order.CustomerEmail)) order.CustomerEmail = currentUser.Email!;
+                order.CustomerEmail = currentUser.Email!;
                 if (string.IsNullOrEmpty(order.CustomerName)) order.CustomerName = currentUser.FullName ?? currentUser.UserName!;
             }
 
@@ -154,6 +154,7 @@ namespace DPDDigitalMarketing.Controllers
             return RedirectToAction("Details", "Product", new { id = productId });
         }
 
+        [Authorize]
         public async Task<IActionResult> Confirmation(int id)
         {
             var order = await _context.Orders
@@ -163,6 +164,16 @@ namespace DPDDigitalMarketing.Controllers
 
             if (order == null) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = currentUser?.Email != null &&
+                          string.Equals(order.CustomerEmail, currentUser.Email, StringComparison.OrdinalIgnoreCase);
+
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid();
+            }
+
             return View(order);
         }
 
@@ -170,7 +181,7 @@ namespace DPDDigitalMarketing.Controllers
         public async Task<IActionResult> SalesHistory()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var isStaff = User.IsInRole("Admin") || (currentUser?.Email != null && currentUser.Email.Contains("admin"));
+            var isStaff = User.IsInRole("Admin");
 
             var query = _context.Orders
                 .Include(o => o.OrderItems)
@@ -180,9 +191,8 @@ namespace DPDDigitalMarketing.Controllers
 
             if (!isStaff && currentUser != null)
             {
-
                 var userEmail = (currentUser.Email ?? "").ToLower();
-                query = query.Where(o => o.CustomerEmail.ToLower() == userEmail || o.Status == "Outbound Referral");
+                query = query.Where(o => o.CustomerEmail.ToLower() == userEmail);
             }
 
             var orders = await query.ToListAsync();
@@ -191,7 +201,8 @@ namespace DPDDigitalMarketing.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ClearAllOrders()
         {
             _context.OrderItems.RemoveRange(_context.OrderItems);

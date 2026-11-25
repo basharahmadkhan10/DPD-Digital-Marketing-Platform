@@ -49,6 +49,8 @@ namespace DPDDigitalMarketing.Controllers
 
             if (result.Succeeded)
             {
+                HttpContext.Session.Remove("DPD_Unlocked_Products");
+                HttpContext.Session.SetString("Customer_Email", user.Email ?? "");
                 TempData["SuccessMessage"] = $"Welcome back, {user.FullName ?? user.UserName}!";
                 if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                 {
@@ -107,6 +109,8 @@ namespace DPDDigitalMarketing.Controllers
                 await _userManager.AddToRoleAsync(user, roleName);
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                HttpContext.Session.Remove("DPD_Unlocked_Products");
+                HttpContext.Session.SetString("Customer_Email", user.Email ?? "");
                 TempData["SuccessMessage"] = "Account created successfully! Welcome to DPD Portal.";
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -129,6 +133,7 @@ namespace DPDDigitalMarketing.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            HttpContext.Session.Clear();
             TempData["SuccessMessage"] = "You have been logged out successfully.";
             return RedirectToAction("Index", "Home");
         }

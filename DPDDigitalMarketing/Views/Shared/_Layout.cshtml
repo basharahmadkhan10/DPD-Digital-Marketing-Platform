@@ -49,9 +49,12 @@
                     </a>
                     <a asp-controller="Product" asp-action="Index" asp-route-category="Journal" class="nav-link fw-semibold px-2 py-1">Journals</a>
                     <a asp-controller="Library" asp-action="Index" class="nav-link fw-semibold px-2 py-1"><i class="bi bi-collection-play text-warning me-1"></i> Library</a>
-                    <a asp-controller="Marketing" asp-action="Dashboard" class="nav-link fw-semibold px-2 py-1">
-                        <i class="bi bi-graph-up-arrow text-warning me-1"></i> Analytics
-                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Marketing" asp-action="Dashboard" class="nav-link fw-semibold px-2 py-1">
+                            <i class="bi bi-graph-up-arrow text-warning me-1"></i> Analytics
+                        </a>
+                    }
                     <a asp-controller="Order" asp-action="SalesHistory" class="nav-link fw-semibold px-2 py-1">Orders</a>
                 </nav>
 

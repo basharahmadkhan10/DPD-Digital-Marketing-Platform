@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DPDDigitalMarketing.Data;
@@ -6,6 +7,7 @@ using DPDDigitalMarketing.Services;
 
 namespace DPDDigitalMarketing.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MarketingController : Controller
     {
         private readonly AppDbContext _context;
