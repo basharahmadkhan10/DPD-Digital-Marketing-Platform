@@ -28,9 +28,14 @@
                             <h5 class="fw-bold mb-1">Your Digital Reader Is Ready!</h5>
                             <p class="text-muted small mb-0">You now have lifetime digital access to full vacancy tables, exam syllabus breakdowns, and downloadable gazette PDFs.</p>
                         </div>
-                        <a asp-controller="Library" asp-action="Read" asp-route-id="@firstProductId" class="btn btn-ink py-2 px-3 text-nowrap">
-                            <i class="bi bi-book-half me-1"></i> Start Reading Now
-                        </a>
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <a asp-controller="Library" asp-action="Read" asp-route-id="@firstProductId" class="btn btn-ink py-2 px-3 text-nowrap">
+                                <i class="bi bi-book-half me-1"></i> Start Reading Now
+                            </a>
+                            <a asp-controller="Library" asp-action="DownloadPdf" asp-route-id="@firstProductId" class="btn btn-pill-outline py-2 px-3 text-nowrap">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Publication PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -55,15 +60,21 @@
                 </div>
 
                 <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <a asp-action="DownloadReceiptPdf" asp-route-id="@Model.Id" class="btn btn-warning py-2 px-3 fw-bold text-dark">
+                        <i class="bi bi-download me-1"></i> Download Receipt PDF
+                    </a>
                     <a asp-controller="Library" asp-action="Index" class="btn btn-ink py-2 px-4">
                         <i class="bi bi-collection-play me-1"></i> Open My Library
                     </a>
                     <a asp-controller="Product" asp-action="Index" class="btn btn-pill-outline py-2 px-3">
                         Continue Browsing
                     </a>
-                    <a asp-controller="Marketing" asp-action="Dashboard" class="btn btn-pill-outline py-2 px-3">
-                        View Analytics Impact
-                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Marketing" asp-action="Dashboard" class="btn btn-pill-outline py-2 px-3">
+                            View Analytics Impact
+                        </a>
+                    }
                 </div>
             </div>
         </div>

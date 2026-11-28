@@ -197,6 +197,30 @@ namespace DPDDigitalMarketing.Controllers
         }
 
         [Authorize]
+        public async Task<IActionResult> DownloadReceiptPdf(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = currentUser?.Email != null &&
+                          string.Equals(order.CustomerEmail, currentUser.Email, StringComparison.OrdinalIgnoreCase);
+
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid();
+            }
+
+            var pdfBytes = PdfDocumentBuilder.BuildOrderReceiptPdf(order);
+            return File(pdfBytes, "application/pdf", $"DPD_Order_Receipt_{order.Id}.pdf");
+        }
+
+        [Authorize]
         public async Task<IActionResult> SalesHistory()
         {
             var currentUser = await _userManager.GetUserAsync(User);

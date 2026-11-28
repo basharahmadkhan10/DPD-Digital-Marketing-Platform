@@ -83,11 +83,16 @@
                                 {
                                     <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
                                         <span class="small fw-semibold">@(item.Product?.Title ?? "Publication") <span class="text-muted fw-normal">(×@item.Quantity)</span></span>
-                                        @if (item.ProductId > 0)
+                                        @if (item.ProductId > 0 && order.Status == "Completed")
                                         {
-                                            <a asp-controller="Library" asp-action="Read" asp-route-id="@item.ProductId" class="btn btn-pill-outline btn-sm rounded-pill px-2 py-0 text-nowrap" style="font-size: 0.72rem;" title="Read Online">
-                                                <i class="bi bi-book-half me-1"></i> Read Online
-                                            </a>
+                                            <div class="d-flex gap-1 text-nowrap">
+                                                <a asp-controller="Library" asp-action="Read" asp-route-id="@item.ProductId" class="btn btn-pill-outline btn-sm rounded-pill px-2 py-0" style="font-size: 0.72rem;" title="Read Online">
+                                                    <i class="bi bi-book-half me-1"></i> Read
+                                                </a>
+                                                <a asp-controller="Library" asp-action="DownloadPdf" asp-route-id="@item.ProductId" class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0" style="font-size: 0.72rem;" title="Download Publication PDF">
+                                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                                                </a>
+                                            </div>
                                         }
                                     </div>
                                 }
@@ -106,7 +111,12 @@
                             <td>
                                 @if (order.Status == "Completed")
                                 {
-                                    <span class="badge bg-success rounded-pill px-3 py-1 fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Paid / Direct Sale</span>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge bg-success rounded-pill px-3 py-1 fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Paid / Direct Sale</span>
+                                        <a asp-action="DownloadReceiptPdf" asp-route-id="@order.Id" class="btn btn-pill-outline btn-sm rounded-pill px-2 py-0" style="font-size: 0.72rem;" title="Download Order Receipt PDF">
+                                            <i class="bi bi-receipt me-1"></i> Receipt PDF
+                                        </a>
+                                    </div>
                                 }
                                 else
                                 {

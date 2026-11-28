@@ -63,5 +63,29 @@ namespace DPDDigitalMarketing.Controllers
 
             return View(issue);
         }
+
+        public IActionResult DownloadPdf(int id)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (product == null) return NotFound();
+
+            var issue = _libraryService.GetDigitalIssue(id);
+            if (issue == null) return NotFound();
+
+            var userEmail = User.Identity?.Name ?? HttpContext.Session.GetString("Customer_Email");
+            var isUnlocked = User.IsInRole("Admin") || LibraryAccessHelper.IsProductUnlocked(HttpContext.Session, id, userEmail, _context);
+
+            if (!isUnlocked)
+            {
+                TempData["ErrorMessage"] = "Please unlock or purchase this publication to download its official PDF edition.";
+                return RedirectToAction(nameof(Read), new { id });
+            }
+
+            var pdfBytes = PdfDocumentBuilder.BuildIssuePdf(issue, userEmail);
+            var safeName = string.Concat(issue.Title.Where(c => char.IsLetterOrDigit(c) || c == ' ' || c == '-')).Trim().Replace(' ', '_');
+            if (string.IsNullOrWhiteSpace(safeName)) safeName = $"DPD_Publication_{id}";
+
+            return File(pdfBytes, "application/pdf", $"{safeName}.pdf");
+        }
     }
 }
