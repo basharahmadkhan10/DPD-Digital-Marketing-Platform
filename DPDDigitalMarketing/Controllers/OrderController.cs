@@ -27,6 +27,12 @@ namespace DPDDigitalMarketing.Controllers
         [Authorize]
         public async Task<IActionResult> Checkout(int? productId = null, string channel = "Website")
         {
+            if (User.IsInRole("Admin"))
+            {
+                TempData["ErrorMessage"] = "Admin accounts are for management only and cannot purchase publications.";
+                return RedirectToAction("Dashboard", "Marketing");
+            }
+
             var cart = CartSessionHelper.GetCart(HttpContext.Session);
 
             if (productId.HasValue && !cart.Any(c => c.ProductId == productId.Value))
@@ -77,6 +83,12 @@ namespace DPDDigitalMarketing.Controllers
         [Authorize]
         public async Task<IActionResult> Checkout(Order order)
         {
+            if (User.IsInRole("Admin"))
+            {
+                TempData["ErrorMessage"] = "Admin accounts are for management only and cannot purchase publications.";
+                return RedirectToAction("Dashboard", "Marketing");
+            }
+
             var cart = CartSessionHelper.GetCart(HttpContext.Session);
             if (!cart.Any())
             {

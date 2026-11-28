@@ -17,6 +17,12 @@ namespace DPDDigitalMarketing.Controllers
 
         public IActionResult Index()
         {
+            if (User.IsInRole("Admin"))
+            {
+                TempData["ErrorMessage"] = "Admin accounts are for management only and cannot make purchases.";
+                return RedirectToAction("Dashboard", "Marketing");
+            }
+
             var cart = CartSessionHelper.GetCart(HttpContext.Session);
             return View(cart);
         }
@@ -24,6 +30,22 @@ namespace DPDDigitalMarketing.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1, string? returnUrl = null)
         {
+            if (User.IsInRole("Admin"))
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+                    Request.Headers.Accept.ToString().Contains("application/json") ||
+                    Request.ContentType?.Contains("application/json") == true)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Admin accounts are for management only and cannot add items to bag."
+                    });
+                }
+                TempData["ErrorMessage"] = "Admin accounts are for management only and cannot make purchases.";
+                return RedirectToAction("Dashboard", "Marketing");
+            }
+
             var product = await _context.Products.FindAsync(productId);
             if (product == null || !product.IsActive)
             {

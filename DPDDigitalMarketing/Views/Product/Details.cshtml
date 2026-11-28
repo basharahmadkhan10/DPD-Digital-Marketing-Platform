@@ -37,54 +37,77 @@
                     @Model.Description
                 </p>
 
-                <!-- Multi-Channel Purchase Box (Core Requirement) -->
-                <div class="p-4 rounded-4 bg-light border mb-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <i class="bi bi-cart-check-fill text-warning fs-5"></i>
-                        <span class="fw-bold">Choose Your Purchase Channel:</span>
-                    </div>
+                @if (!User.IsInRole("Admin"))
+                {
+                    <!-- Multi-Channel Purchase Box (Core Requirement for Readers/Customers) -->
+                    <div class="p-4 rounded-4 bg-light border mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-cart-check-fill text-warning fs-5"></i>
+                            <span class="fw-bold">Choose Your Purchase Channel:</span>
+                        </div>
 
-                    <!-- Direct Official DPD Store Options: Cart or Instant Checkout -->
-                    <div class="d-flex flex-column gap-2 mb-3">
-                        <div class="row g-2">
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-pill-outline w-100 py-3 d-flex align-items-center justify-content-center gap-2 fw-bold" onclick="addToCartAjax(@Model.Id, this)">
-                                    <i class="bi bi-bag-plus-fill fs-5"></i>
-                                    <span>Add to Bag</span>
-                                </button>
+                        <!-- Direct Official DPD Store Options: Cart or Instant Checkout -->
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <button type="button" class="btn btn-pill-outline w-100 py-3 d-flex align-items-center justify-content-center gap-2 fw-bold" onclick="addToCartAjax(@Model.Id, this)">
+                                        <i class="bi bi-bag-plus-fill fs-5"></i>
+                                        <span>Add to Bag</span>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.Id" asp-route-channel="Website" class="btn btn-ink w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                        <span>Instant Buy Now</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="col-sm-6">
-                                <a asp-controller="Order" asp-action="Checkout" asp-route-productId="@Model.Id" asp-route-channel="Website" class="btn btn-ink w-100 py-3 d-flex align-items-center justify-content-center gap-2">
-                                    <i class="bi bi-lightning-charge-fill"></i>
-                                    <span>Instant Buy Now</span>
-                                </a>
+                        </div>
+
+                        <!-- External Marketplace Options (Amazon & Flipkart) -->
+                        <div class="pt-2 border-top">
+                            <div class="text-muted small fw-semibold mb-2">Also Available On Marketplaces:</div>
+                            <div class="row g-2">
+                                @if (!string.IsNullOrEmpty(Model.AmazonUrl))
+                                {
+                                    <div class="col-sm-6">
+                                        <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Amazon" class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark" target="_blank">
+                                            <i class="bi bi-shop me-1"></i> Buy on Amazon
+                                        </a>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.FlipkartUrl))
+                                {
+                                    <div class="col-sm-6">
+                                        <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Flipkart" class="btn btn-info w-100 py-2 rounded-pill fw-bold text-white" target="_blank">
+                                            <i class="bi bi-box-seam me-1"></i> Buy on Flipkart
+                                        </a>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
-
-                    <!-- External Marketplace Options (Amazon & Flipkart) -->
-                    <div class="pt-2 border-top">
-                        <div class="text-muted small fw-semibold mb-2">Also Available On Marketplaces:</div>
-                        <div class="row g-2">
-                            @if (!string.IsNullOrEmpty(Model.AmazonUrl))
-                            {
-                                <div class="col-sm-6">
-                                    <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Amazon" class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark" target="_blank">
-                                        <i class="bi bi-shop me-1"></i> Buy on Amazon
-                                    </a>
-                                </div>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.FlipkartUrl))
-                            {
-                                <div class="col-sm-6">
-                                    <a asp-controller="Order" asp-action="TrackOutboundSale" asp-route-productId="@Model.Id" asp-route-channel="Flipkart" class="btn btn-info w-100 py-2 rounded-pill fw-bold text-white" target="_blank">
-                                        <i class="bi bi-box-seam me-1"></i> Buy on Flipkart
-                                    </a>
-                                </div>
-                            }
+                }
+                else
+                {
+                    <div class="p-4 rounded-4 bg-warning-subtle border border-warning mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-shield-check text-warning fs-5"></i>
+                            <span class="fw-bold text-dark">Admin Management Mode</span>
+                        </div>
+                        <p class="text-muted small mb-3">
+                            Admin accounts manage publications, pricing, and marketing campaigns and do not make purchases. You can preview this issue directly in the Digital Library or edit its catalog details below.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-controller="Library" asp-action="Read" asp-route-id="@Model.Id" class="btn btn-ink btn-sm">
+                                <i class="bi bi-book-half me-1"></i> Preview Digital Issue
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm fw-bold">
+                                <i class="bi bi-pencil-square me-1"></i> Edit Publication
+                            </a>
                         </div>
                     </div>
-                </div>
+                }
 
                 <!-- Social Media Sharing & Digital Marketing (Free Sharing - No Purchase Required) -->
                 <div class="border-top pt-3">

@@ -95,9 +95,12 @@
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                             }
-                            <button type="button" class="btn btn-pill-outline btn-sm py-2 px-3" onclick="addToCartAjax(@item.Id, this)" title="Add to Bag">
-                                <i class="bi bi-bag-plus"></i>
-                            </button>
+                            else
+                            {
+                                <button type="button" class="btn btn-pill-outline btn-sm py-2 px-3" onclick="addToCartAjax(@item.Id, this)" title="Add to Bag">
+                                    <i class="bi bi-bag-plus"></i>
+                                </button>
+                            }
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-ink btn-sm py-2 px-3">
                                 <span>Details</span>
                                 <i class="bi bi-arrow-right-short"></i>

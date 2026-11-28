@@ -22,9 +22,10 @@ namespace DPDDigitalMarketing.Controllers
             var userEmail = User.Identity?.Name ?? HttpContext.Session.GetString("Customer_Email");
 
             var unlockedIds = new HashSet<int>();
+            var isAdmin = User.IsInRole("Admin");
             foreach (var issue in issues)
             {
-                if (LibraryAccessHelper.IsProductUnlocked(HttpContext.Session, issue.ProductId, userEmail, _context))
+                if (isAdmin || LibraryAccessHelper.IsProductUnlocked(HttpContext.Session, issue.ProductId, userEmail, _context))
                 {
                     unlockedIds.Add(issue.ProductId);
                 }
@@ -49,7 +50,7 @@ namespace DPDDigitalMarketing.Controllers
             }
 
             var userEmail = User.Identity?.Name ?? HttpContext.Session.GetString("Customer_Email");
-            var isUnlocked = LibraryAccessHelper.IsProductUnlocked(HttpContext.Session, id, userEmail, _context);
+            var isUnlocked = User.IsInRole("Admin") || LibraryAccessHelper.IsProductUnlocked(HttpContext.Session, id, userEmail, _context);
 
             var activeSection = issue.Sections.FirstOrDefault(s => s.Id == section)
                                 ?? issue.Sections.FirstOrDefault();
